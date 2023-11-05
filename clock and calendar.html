@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Analog and Digital Clock</title>
+    <style>
+        #clock {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            height: 50%;
+            width: 50%;
+            font-family: Arial, sans-serif;
+            border: 2px solid black;
+            padding: 10px;
+            border-radius: 10px;
+            text-align: center;
+
+        }
+
+        @media only screen and (max-width: 768px) {
+            #clock {
+                width: 80%;
+                font-size: 14px;
+            }
+        }
+
+        @media only screen and (max-width: 480px) {
+            #clock {
+                width: 90%;
+                font-size: 12px;
+            }
+        }
+
+        #analog-clock {
+            width: 200px;
+            height: 200px;
+            /* border: 2px solid black; */
+            border-radius: 50%;
+            position: relative;
+            background-image: url('https://w7.pngwing.com/pngs/134/1013/png-transparent-analog-clock-illustration-clock-face-digital-clock-speedometer-angle-white-furniture.png');
+            background-size: cover;
+            background-position: center;
+        }
+
+        .maincont {
+            text-align: center;
+            justify-content: center;
+        }
+
+        .hand {
+            background-color: black;
+            position: absolute;
+            transform-origin: bottom center;
+            left: 50%;
+        }
+
+        #hour-hand {
+            width: 4px;
+            height: 70px;
+            top: 33%;
+            margin-top: -35px;
+        }
+
+        #minute-hand {
+            width: 2px;
+            height: 90px;
+            top: 28%;
+            margin-top: -45px;
+            background-color: blue;
+        }
+
+        #second-hand {
+            width: 1px;
+            height: 100px;
+            top: 25%;
+            margin-top: -50px;
+            background-color: red;
+        }
+
+        #digital-clock {
+            font-size: 24px;
+            margin-top: 10px;
+            font-weight: bold;
+            padding: 5px;
+            border-radius: 10px;
+            position: relative;
+            animation: glowing-border 1.5s infinite alternate;
+        }
+
+        #digital-clock:before {
+            content: "";
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            right: -2px;
+            bottom: -2px;
+            border: 2px solid transparent;
+            border-radius: 10px;
+        }
+
+        #date {
+            margin-top: 5%;
+            font-size: 18px;
+            font-weight: bold;
+            text-align: center;
+            animation: glowing-border 2s infinite linear;
+        }
+
+        #alarm-form {
+            margin-top: 20px;
+        }
+
+        #alarm-form input {
+            margin-right: 5px;
+        }
+
+        #alarm-form button {
+            margin-top: 5px;
+        }
+
+        @keyframes glowing-border {
+            0% {
+                box-shadow: 0 0 5px blue;
+            }
+
+            25% {
+                box-shadow: 0 0 5px rgb(242, 14, 113);
+            }
+
+            50% {
+                box-shadow: 0 0 5px yellow;
+            }
+
+            75% {
+                box-shadow: 0 0 5px green;
+            }
+
+            100% {
+                box-shadow: 0 0 5px red;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="maincont">
+        <div id="clock">
+            <div id="analog-clock">
+                <div class="hand" id="hour-hand"></div>
+                <div class="hand" id="minute-hand"></div>
+                <div class="hand" id="second-hand"></div>
+            </div>
+            <div id="digital-clock">
+                00:00:00</div>
+            <div id="date"></div>
+            <form id="alarm-form">
+                <input type="time" id="alarm-time" required>
+                <button type="submit">Set Alarm</button>
+            </form>
+        </div>
+    </div>
+    <script>
+        function updateClock() {
+            var now = new Date();
+
+            // Update digital clock
+            var digitalClock = document.getElementById("digital-clock");
+            digitalClock.textContent = formatTime(now);
+
+            // Update date
+            var dateElement = document.getElementById("date");
+            dateElement.textContent = formatDate(now);
+
+            // Check if alarm time is reached
+            var alarmTime = document.getElementById("alarm-time").value;
+            var currentHour = now.getHours();
+            var currentMinute = now.getMinutes();
+            var alarmHour = parseInt(alarmTime.split(":")[0]);
+            var alarmMinute = parseInt(alarmTime.split(":")[1]);
+
+            if (currentHour === alarmHour && currentMinute === alarmMinute) {
+                alert("Alarm time reached!");
+            }
+
+            // Update analog clock
+            var hourHand = document.getElementById("hour-hand");
+            var minuteHand = document.getElementById("minute-hand");
+            var secondHand = document.getElementById("second-hand");
+
+            var hours = now.getHours();
+            var minutes = now.getMinutes();
+            var seconds = now.getSeconds();
+
+            var hourRotation = (hours * 30) + (minutes / 2);
+            var minuteRotation = (minutes * 6) + (seconds / 10);
+            var secondRotation = seconds * 6;
+
+            hourHand.style.transform = "rotate(" + hourRotation + "deg)";
+            minuteHand.style.transform = "rotate(" + minuteRotation + "deg)";
+            secondHand.style.transform = "rotate(" + secondRotation + "deg)";
+        }
+
+        function formatTime(date) {
+            var hours = date.getHours();
+            var minutes = date.getMinutes();
+            var seconds = date.getSeconds();
+
+            // Check if 12-hour or 24-hour format
+            var is24HourFormat = true;
+            var timeString = '';
+
+            if (is24HourFormat) {
+                timeString = padNumber(hours) + ':' + padNumber(minutes) + ':' + padNumber(seconds);
+            } else {
+                var period = (hours >= 12) ? 'PM' : 'AM';
+                hours = hours % 12 || 12;
+                timeString = padNumber(hours) + ':' + padNumber(minutes) + ':' + padNumber(seconds) + ' ' + period;
+            }
+
+            return timeString;
+        }
+
+        function formatDate(date) {
+            var options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+            return date.toLocaleDateString(undefined, options);
+        }
+
+        function padNumber(number) {
+            return (number < 10) ? '0' + number : number;
+        }
+
+        // Update clock every second
+        setInterval(updateClock, 1000);
+
+        // Set alarm
+        var alarmForm = document.getElementById("alarm-form");
+        alarmForm.addEventListener("submit", function (event) {
+            event.preventDefault();
+            var alarmTime = document.getElementById("alarm-time").value;
+            alert("Alarm set for " + alarmTime);
+        });
+    </script>
+</body>
+
+</html>
